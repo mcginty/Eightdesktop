@@ -5,12 +5,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
 
 public class NetworkThread extends Thread {
+	WebcamInterface parent;
 	private final int port;
 	private ServerSocket serverSock;
 	private Socket clientSock;
@@ -18,8 +20,10 @@ public class NetworkThread extends Thread {
 	private ObjectInputStream in = null;
 	private boolean isConnected = false;
 	private Queue<DataPacket> sendQueue;
+	final static int MAX_LATENCY_MS = 500;
 	
-	public NetworkThread(int port) {
+	public NetworkThread(WebcamInterface parent, int port) {
+		this.parent = parent;
 		this.port = port;
 		sendQueue = new LinkedBlockingQueue<DataPacket>();
 	}
@@ -40,10 +44,13 @@ public class NetworkThread extends Thread {
 				//System.out.println("Attempting write of bytes.");
 				if (!sendQueue.isEmpty()) {
 					DataPacket pkt = sendQueue.poll();
-					int size = pkt.getSerializedSize();
-					System.out.println("Sending a packet of size " + size + " to client.");
-					out.writeInt(size);
-					out.write(pkt.toByteArray());
+					System.out.println("Latency: "+ (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp()));
+					if (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp() < MAX_LATENCY_MS) {
+						int size = pkt.getSerializedSize();
+						System.out.println("Sending a packet of size " + size + " to client.");
+						out.writeInt(size);
+						out.write(pkt.toByteArray());
+					}
 				}
 			}
 			

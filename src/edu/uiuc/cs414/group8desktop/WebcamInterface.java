@@ -28,7 +28,7 @@ public class WebcamInterface extends PApplet {
 	
 	public void setup() {
 		size(320, 240);
-		frameRate(30);
+		frameRate(5);
 		cam = new GSCapture(this, 320, 240, "/dev/video1");
 		int[][] res = cam.resolutions();
 		for (int i = 0; i < res.length; i++) {
@@ -38,10 +38,10 @@ public class WebcamInterface extends PApplet {
 		for (int i = 0; i < fps.length; i++) {
 			println(fps[i]);
 		}
-		net = new NetworkThread(6666);
+		net = new NetworkThread(this, 6666);
 		net.start();
 		
-		initialTimestamp = (new Date()).getTime();
+		initialTimestamp = 0;
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class WebcamInterface extends PApplet {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+				if (initialTimestamp == 0) initialTimestamp = (new Date()).getTime();
 			    ByteString buf = ByteString.copyFrom(bytes);
 				DataPacket proto = DataPacket.newBuilder()
 									.setTimestamp((new Date()).getTime() - initialTimestamp)
