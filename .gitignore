@@ -14,3 +14,4 @@ gen
 
 # generated GUI files
 *R.java
+.classpath

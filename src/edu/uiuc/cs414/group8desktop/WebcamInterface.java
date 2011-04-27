@@ -1,21 +1,18 @@
 package edu.uiuc.cs414.group8desktop;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.CharBuffer;
 import java.util.Date;
-import java.util.concurrent.Executors;
+
+import processing.core.PApplet;
+import codeanticode.gsvideo.GSCapture;
 
 import com.google.protobuf.ByteString;
 
-import codeanticode.gsvideo.GSCapture;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket.PacketType;
-import processing.core.*;
 public class WebcamInterface extends PApplet {
 	/**
 	 * 
