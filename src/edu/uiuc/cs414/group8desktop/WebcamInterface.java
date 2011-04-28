@@ -27,11 +27,12 @@ public class WebcamInterface extends PApplet {
 	
 	NetworkThread net;
 	AudioThread audio;
+	ControlThread control;
 	
 	public void setup() {
 		size(320, 240);
 		frameRate(5);
-		cam = new GSCapture(this, 320, 240, "/dev/video0");
+		cam = new GSCapture(this, 320, 240, "/dev/video1");
 		int[][] res = cam.resolutions();
 		for (int i = 0; i < res.length; i++) {
 			println(res[i][0] + "x" + res[i][1]);
@@ -42,6 +43,9 @@ public class WebcamInterface extends PApplet {
 		}
 		net = new NetworkThread(this, 6666);
 		net.start();
+		
+		//control = new ControlThread(this, 6667);
+		//control.start();
 		
 		audio = new AudioThread(this);
 		audio.start();
