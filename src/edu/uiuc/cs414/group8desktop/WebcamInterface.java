@@ -11,6 +11,9 @@ import codeanticode.gsvideo.GSCapture;
 
 import com.google.protobuf.ByteString;
 
+import controlP5.ControlEvent;
+import controlP5.ControlP5;
+
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket.PacketType;
 public class WebcamInterface extends PApplet {
@@ -20,13 +23,15 @@ public class WebcamInterface extends PApplet {
 	private static final long serialVersionUID = 1L;
 	GSCapture cam;
 	long initialTimestamp;
+	ControlP5 controlP5;
 	
 	NetworkThread net;
+	AudioThread audio;
 	
 	public void setup() {
 		size(320, 240);
 		frameRate(5);
-		cam = new GSCapture(this, 320, 240, "/dev/video1");
+		cam = new GSCapture(this, 320, 240, "/dev/video0");
 		int[][] res = cam.resolutions();
 		for (int i = 0; i < res.length; i++) {
 			println(res[i][0] + "x" + res[i][1]);
@@ -38,7 +43,14 @@ public class WebcamInterface extends PApplet {
 		net = new NetworkThread(this, 6666);
 		net.start();
 		
+		audio = new AudioThread(this);
+		audio.start();
+		
 		initialTimestamp = 0;
+		
+		// Interface manager, controlP5
+		controlP5 = new ControlP5(this);
+		controlP5.addButton("Start", 1, 10, 250, 100, 50);
 	}
 	
 	/**
@@ -94,6 +106,14 @@ public class WebcamInterface extends PApplet {
 	
 	public void mousePressed() {
 		println("clicky");
+	}
+	
+	public void controlEvent(ControlEvent theEvent) {
+		println(theEvent.controller().name());
+	}
+	
+	public void Start(int theValue) {
+		println("a button event from Start: "+theValue);
 	}
 	
 	/**

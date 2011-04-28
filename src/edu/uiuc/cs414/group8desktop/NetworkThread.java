@@ -25,7 +25,7 @@ public class NetworkThread extends Thread {
 	public NetworkThread(WebcamInterface parent, int port) {
 		this.parent = parent;
 		this.port = port;
-		sendQueue = new LinkedBlockingQueue<DataPacket>();
+		sendQueue = new LinkedBlockingQueue<DataPacket>(10);
 	}
 	
 	public void run() {
@@ -47,7 +47,7 @@ public class NetworkThread extends Thread {
 					System.out.println("Latency: "+ (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp()));
 					if (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp() < MAX_LATENCY_MS) {
 						int size = pkt.getSerializedSize();
-						System.out.println("Sending a packet of size " + size + " to client.");
+						System.out.println("Sending a packet of size " + size + " and type " + pkt.getType().toString() + " to client.");
 						out.writeInt(size);
 						out.write(pkt.toByteArray());
 					}
@@ -60,6 +60,9 @@ public class NetworkThread extends Thread {
 	}
 	
 	public void queuePacket(DataPacket pkt) {
+		if (sendQueue.size() == 10) {
+			for (int i=0; i<10; i++) sendQueue.remove();
+		}
 		System.out.println("pkt with timestamp " + pkt.getTimestamp() + " queued. qsize: " + sendQueue.size());
 		sendQueue.add(pkt);
 	}
