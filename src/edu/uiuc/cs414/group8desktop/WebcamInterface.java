@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+
 import processing.core.PApplet;
 import codeanticode.gsvideo.GSCapture;
 
@@ -24,7 +27,7 @@ public class WebcamInterface extends PApplet {
 	GSCapture cam;
 	long initialTimestamp;
 	ControlP5 controlP5;
-	
+	Mixer mixer;
 	NetworkThread net;
 	AudioThread audio;
 	ControlThread control;
@@ -44,9 +47,11 @@ public class WebcamInterface extends PApplet {
 			println(fps[i]);
 		}
 		
+	      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+	      mixer = AudioSystem.getMixer(mixerInfo[0]);
+		
 		net = new NetworkThread(this, 6666);
 		net.start();
-
 		
 		audio = new AudioThread(this);
 		audio.start();

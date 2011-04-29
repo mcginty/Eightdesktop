@@ -8,9 +8,11 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
+import org.classpath.icedtea.pulseaudio.PulseAudioMixer;
 import org.classpath.icedtea.pulseaudio.PulseAudioSourceDataLine;
 
 import com.google.protobuf.ByteString;
@@ -45,10 +47,26 @@ public class AudioPlayThread extends Thread {
 												channels, 
 												signed, 
 												bigEndian);
-			DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
-			PulseAudioSourceDataLine line = (PulseAudioSourceDataLine) AudioSystem.getLine(info);
+
+	
+		      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+		      Mixer mixer = AudioSystem.getMixer(mixerInfo[2]);
+			      System.out.println("Available mixers:");
+			      for(int cnt = 0; cnt < mixerInfo.length;
+			                                          cnt++){
+			      	System.out.println(mixerInfo[cnt].
+			      	                              getName());
+			      }//end for loop
+			     
+
+			      DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
+			SourceDataLine line = (SourceDataLine) mixer.getLine(dataLineInfo);
+			
+			System.out.println("AudioSystem.getLine succeeded");
 			line.open(format);
+			System.out.println("Line.open succeeded");
 			line.start();
+			
 			System.out.println("Server Audio Play Thread opened the audio line successfully");
 			//int bufferSize = (int)format.getSampleRate() * format.getFrameSize();
 			int bufferSize = 1024;

@@ -7,6 +7,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
 import com.google.protobuf.ByteString;
@@ -36,8 +38,12 @@ public class AudioThread extends Thread {
 												channels, 
 												signed, 
 												bigEndian);
+			
+		      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+		      Mixer mixer = AudioSystem.getMixer(mixerInfo[3]);
+			
 			DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
-			TargetDataLine line = (TargetDataLine) AudioSystem.getLine(info);
+			TargetDataLine line = (TargetDataLine) mixer.getLine(info);
 			line.open(format);
 			line.start();
 			//int bufferSize = (int)format.getSampleRate() * format.getFrameSize();

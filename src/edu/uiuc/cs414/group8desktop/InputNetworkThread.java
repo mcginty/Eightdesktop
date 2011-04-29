@@ -48,9 +48,9 @@ public class InputNetworkThread extends Thread{
 				System.out.println("Entering Input network loop.");
 				while (true) {
 				try{
-					System.out.println("In thread before read: ");
+				//	System.out.println("In thread before read: ");
 					size = input.readInt();
-					System.out.println("Recieved packet of size " + size);
+				//	System.out.println("Recieved packet of size " + size);
 					if (size < 0)
 						continue;
 					byte[] bytes = new byte[size];
@@ -59,14 +59,14 @@ public class InputNetworkThread extends Thread{
 					if (initTimestamp == 0)
 						initTimestamp = (new Date()).getTime();
 
-					System.out.println("Recieved Packet");
+				//	System.out.println("Recieved Packet");
 					//Log.d("Stream", "Latency: " + ((pkt.getTimestamp() - ((new Date()).getTime() - initTimestamp))));
 					if (pkt.getType() == DataPacket.PacketType.VIDEO) {
-						System.out.println("Recieved Video Packet");
+				//		System.out.println("Recieved Video Packet");
 						//	videoHandler.queueFrame(pkt); // modified from parent
 					}
 					else if (pkt.getType() == DataPacket.PacketType.AUDIO) {
-						System.out.println("Recieved Audio Packet");
+				//		System.out.println("Recieved Audio Packet");
 						parent.audioplay.queueFrame(pkt); //modified from parent
 					}
 				} catch (IOException e) {
