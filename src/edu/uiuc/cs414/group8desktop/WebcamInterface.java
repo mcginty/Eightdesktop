@@ -28,6 +28,8 @@ public class WebcamInterface extends PApplet {
 	NetworkThread net;
 	AudioThread audio;
 	ControlThread control;
+	InputNetworkThread innet;
+	AudioPlayThread audioplay;
 	
 	public void setup() {
 		size(320, 240);
@@ -41,6 +43,7 @@ public class WebcamInterface extends PApplet {
 		for (int i = 0; i < fps.length; i++) {
 			println(fps[i]);
 		}
+		
 		net = new NetworkThread(this, 6666);
 		net.start();
 
@@ -50,6 +53,12 @@ public class WebcamInterface extends PApplet {
 		
 		control = new ControlThread(this, 6667);
 		control.start();
+		
+		innet = new InputNetworkThread(this, 6668);
+		innet.start();
+		
+		audioplay = new AudioPlayThread(this);
+		audioplay.start();
 		
 		initialTimestamp = 0;
 		

@@ -42,6 +42,8 @@ public class NetworkThread extends Thread {
 			serverSock = new ServerSocket(port);
 			clientSock = serverSock.accept();
 			
+			
+			
 			System.out.println("Network Successfully connected to client " + clientSock.getInetAddress().toString());
 			isConnected = true;
 			
