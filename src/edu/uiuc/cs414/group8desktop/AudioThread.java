@@ -47,7 +47,7 @@ public class AudioThread extends Thread {
 			line.open(format);
 			line.start();
 			//int bufferSize = (int)format.getSampleRate() * format.getFrameSize();
-			int bufferSize = 1024;
+			int bufferSize = 4096;
 			System.out.println("bufferSize selected as: " + bufferSize);
 			byte buffer[] = new byte[bufferSize];
 			while (true) {
