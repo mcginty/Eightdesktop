@@ -39,7 +39,7 @@ public class InputNetworkThread extends Thread{
 				
 				input = new DataInputStream(clientSock.getInputStream());
 				//out = new ObjectOutputStream(clientSock.getOutputStream());
-				System.out.println("Entering Input network loop.");
+				//System.out.println("Entering Input network loop.");
 				while (true) {
 				try{
 				//	System.out.println("In thread before read: ");
@@ -49,6 +49,7 @@ public class InputNetworkThread extends Thread{
 						continue;
 					byte[] bytes = new byte[size];
 					input.readFully(bytes);
+					parent.updateInBandwidth(size+4);
 					DataPacket pkt = DataPacket.parseFrom(bytes);
 					if (initTimestamp == 0)
 						initTimestamp = (new Date()).getTime();
@@ -65,7 +66,7 @@ public class InputNetworkThread extends Thread{
 						parent.audioplay.queueFrame(pkt); //modified from parent
 					}
 				} catch (IOException e) {
-					System.out.println("IOException in receiving the packet. Message: " + e.getStackTrace());
+					System.err.println("IOException in receiving the packet. Message: " + e.getStackTrace());
 					clientSock.close();
 					return;
 					}
