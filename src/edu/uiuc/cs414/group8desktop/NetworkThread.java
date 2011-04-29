@@ -34,20 +34,20 @@ public class NetworkThread extends Thread {
 			serverSock = new ServerSocket(port);
 			clientSock = serverSock.accept();
 			
-			System.out.println("Successfully connected to client " + clientSock.getInetAddress().toString());
+			System.out.println("Network Successfully connected to client " + clientSock.getInetAddress().toString());
 			isConnected = true;
 			
 			//in = new ObjectInputStream(clientSock.getInputStream());
 			out = new ObjectOutputStream(clientSock.getOutputStream());
-			System.out.println("Entering loop.");
+			System.out.println("Entering network loop.");
 			while (true) {
 				//System.out.println("Attempting write of bytes.");
 				if (!sendQueue.isEmpty()) {
 					DataPacket pkt = sendQueue.poll();
-					System.out.println("Latency: "+ (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp()));
+					//System.out.println("Latency: "+ (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp()));
 					if (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp() < MAX_LATENCY_MS) {
 						int size = pkt.getSerializedSize();
-						System.out.println("Sending a packet of size " + size + " and type " + pkt.getType().toString() + " to client.");
+						//System.out.println("Sending a packet of size " + size + " and type " + pkt.getType().toString() + " to client.");
 						out.writeInt(size);
 						out.write(pkt.toByteArray());
 					}
@@ -63,7 +63,7 @@ public class NetworkThread extends Thread {
 		if (sendQueue.size() == 10) {
 			for (int i=0; i<10; i++) sendQueue.remove();
 		}
-		System.out.println("pkt with timestamp " + pkt.getTimestamp() + " queued. qsize: " + sendQueue.size());
+		//System.out.println("pkt with timestamp " + pkt.getTimestamp() + " queued. qsize: " + sendQueue.size());
 		sendQueue.add(pkt);
 	}
 	
