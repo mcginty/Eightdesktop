@@ -1,28 +1,33 @@
 package edu.uiuc.cs414.group8desktop;
 
+import java.awt.Frame;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 import codeanticode.gsvideo.GSCapture;
 
 import com.google.protobuf.ByteString;
 
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
-
-import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
-import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket.ControlType;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket.PacketType;
+
+
 
 public class WebcamInterface extends PApplet {
 	/**
@@ -40,6 +45,8 @@ public class WebcamInterface extends PApplet {
 	ControlThread control;
 	InputNetworkThread innet;
 	AudioPlayThread audioplay;
+	secondApplet s;
+	Queue<DataPacket> videoQueue;
 	
 	int outBW = 0;
 	int inBW = 0;
@@ -47,7 +54,7 @@ public class WebcamInterface extends PApplet {
 	public void setup() {
 		size(320, 240);
 		frameRate(5);
-		cam = new GSCapture(this, 320, 240, "/dev/video1");
+		cam = new GSCapture(this, 320, 240, "/dev/video0");
 		int[][] res = cam.resolutions();
 		for (int i = 0; i < res.length; i++) {
 			println(res[i][0] + "x" + res[i][1]);
@@ -60,6 +67,7 @@ public class WebcamInterface extends PApplet {
 	      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
 	      mixer = AudioSystem.getMixer(mixerInfo[0]);
 		
+	    videoQueue = new LinkedBlockingQueue<DataPacket>();
 		net = new NetworkThread(this, 6666);
 		net.start();
 
@@ -81,9 +89,7 @@ public class WebcamInterface extends PApplet {
 		audioplay = new AudioPlayThread(this);
 		audioplay.start();
 		
-		// Interface manager, controlP5
-		controlP5 = new ControlP5(this);
-		controlP5.addButton("Start", 1, 10, 250, 100, 50);
+		new PFrame();
 	}
 	
 	private class BwTask extends TimerTask {
@@ -141,7 +147,6 @@ public class WebcamInterface extends PApplet {
 				        throw new IOException("Could not completely read file "+file.getName());
 				    }
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				//newTimestamp = (new Date()).getTime();
@@ -154,6 +159,52 @@ public class WebcamInterface extends PApplet {
 				if (initialTimestamp != 0)
 					net.queuePacket(proto);
 		    }
+		}
+	}
+	
+	public class PFrame extends Frame {
+		private static final long serialVersionUID = -1600857993908936580L;
+
+		public PFrame() {
+			setBounds(320, 0, 432,768);
+			s = new secondApplet();
+			add(s);
+			s.init();
+			setVisible(true); // was show();
+		}
+	}
+
+	public class secondApplet extends PApplet {
+		private static final long serialVersionUID = -3637569539554282527L;
+
+		public void setup() {
+			size(432,768);
+			frameRate(15);
+		}
+
+		public void draw() {
+			if (!videoQueue.isEmpty()) {
+				DataPacket pkt = videoQueue.poll();
+				
+				loadPixels();
+				
+				byte []imgdata = pkt.getData().toByteArray();
+				
+				
+				
+				for (int i=0; i<imgdata.length; i+=2) {
+					short imgpixel = imgdata[2*i];
+					int color = ((imgpixel<<3)>>3);
+					pixels[i] = color(color, color, color);
+				}
+				updatePixels();
+				
+				System.out.println("Video packet received of type: " + pkt.getSerializedSize());
+				
+
+			}
+			
+			redraw();
 		}
 	}
 	

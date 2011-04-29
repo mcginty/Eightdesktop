@@ -2,8 +2,6 @@ package edu.uiuc.cs414.group8desktop;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
@@ -23,10 +21,6 @@ public class InputNetworkThread extends Thread{
 		private int size;
 		final static int MAX_LATENCY_MS = 500;
 		private long initTimestamp;
-		
-	    final static int nameserverPort = 3825;
-	    final static String nameserverIP = "192.17.255.225";
-		
 		
 		public InputNetworkThread(WebcamInterface parent, int port) {
 			this.parent = parent;
@@ -64,6 +58,7 @@ public class InputNetworkThread extends Thread{
 					if (pkt.getType() == DataPacket.PacketType.VIDEO) {
 				//		System.out.println("Recieved Video Packet");
 						//	videoHandler.queueFrame(pkt); // modified from parent
+						parent.videoQueue.add(pkt);
 					}
 					else if (pkt.getType() == DataPacket.PacketType.AUDIO) {
 				//		System.out.println("Recieved Audio Packet");
