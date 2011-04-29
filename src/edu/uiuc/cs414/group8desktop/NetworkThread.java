@@ -19,13 +19,12 @@ public class NetworkThread extends Thread {
 	private ServerSocket serverSock;
 	private Socket clientSock;
 	private ObjectOutputStream out = null;
-	private ObjectInputStream in = null;
 	private boolean isConnected = false;
 	private Queue<DataPacket> sendQueue;
 	final static int MAX_LATENCY_MS = 500;
 	
     final static int nameserverPort = 3825;
-    final static String nameserverIP = "192.17.252.150";
+    final static String nameserverIP = "192.17.255.94";
 	
 	
 	public NetworkThread(WebcamInterface parent, int port) {

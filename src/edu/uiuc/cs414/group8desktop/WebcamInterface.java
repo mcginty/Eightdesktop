@@ -16,14 +16,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 
+import com.google.protobuf.ByteString;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import codeanticode.gsvideo.GSCapture;
 
-import com.google.protobuf.ByteString;
-
-import controlP5.ControlEvent;
-import controlP5.ControlP5;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket.PacketType;
 
@@ -38,7 +36,6 @@ public class WebcamInterface extends PApplet {
 	long initialTimestamp;
 	long newTimestamp;
 	long deltaTimestamp;
-	ControlP5 controlP5;
 	Mixer mixer;
 	NetworkThread net;
 	AudioThread audio;
@@ -166,7 +163,7 @@ public class WebcamInterface extends PApplet {
 		private static final long serialVersionUID = -1600857993908936580L;
 
 		public PFrame() {
-			setBounds(320, 0, 432,768);
+			setBounds(320, 0, 432, 738);
 			s = new secondApplet();
 			add(s);
 			s.init();
@@ -178,7 +175,7 @@ public class WebcamInterface extends PApplet {
 		private static final long serialVersionUID = -3637569539554282527L;
 
 		public void setup() {
-			size(432,768);
+			size(432,738);
 			frameRate(15);
 		}
 
@@ -186,18 +183,27 @@ public class WebcamInterface extends PApplet {
 			if (!videoQueue.isEmpty()) {
 				DataPacket pkt = videoQueue.poll();
 				
-				loadPixels();
-				
-				byte []imgdata = pkt.getData().toByteArray();
-				
-				
-				
-				for (int i=0; i<imgdata.length; i+=2) {
-					short imgpixel = imgdata[2*i];
-					int color = ((imgpixel<<3)>>3);
-					pixels[i] = color(color, color, color);
+				File tempjpg = new File("tempin.jpg");
+				try {
+					FileOutputStream fos = new FileOutputStream(tempjpg);
+					fos.write(pkt.getData().toByteArray());
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				updatePixels();
+				
+				PImage img = loadImage("tempin.jpg");
+				pushMatrix();
+				translate(width/2, height/2);
+				rotate(PI/2);
+				translate(-img.width/2, -img.height/2);
+				image(img, 0, 0);
+				popMatrix();
+				
+				
 				
 				System.out.println("Video packet received of type: " + pkt.getSerializedSize());
 				
@@ -210,14 +216,6 @@ public class WebcamInterface extends PApplet {
 	
 	public void mousePressed() {
 		println("clicky");
-	}
-	
-	public void controlEvent(ControlEvent theEvent) {
-		println(theEvent.controller().name());
-	}
-	
-	public void Start(int theValue) {
-		println("a button event from Start: "+theValue);
 	}
 	
 	/**

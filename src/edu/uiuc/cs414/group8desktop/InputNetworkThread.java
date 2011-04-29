@@ -56,7 +56,7 @@ public class InputNetworkThread extends Thread{
 				//	System.out.println("Recieved Packet");
 					//Log.d("Stream", "Latency: " + ((pkt.getTimestamp() - ((new Date()).getTime() - initTimestamp))));
 					if (pkt.getType() == DataPacket.PacketType.VIDEO) {
-				//		System.out.println("Recieved Video Packet");
+						System.out.println("Recieved Video Packet");
 						//	videoHandler.queueFrame(pkt); // modified from parent
 						parent.videoQueue.add(pkt);
 					}
