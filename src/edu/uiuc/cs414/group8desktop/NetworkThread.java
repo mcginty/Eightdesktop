@@ -1,5 +1,7 @@
 package edu.uiuc.cs414.group8desktop;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,6 +24,10 @@ public class NetworkThread extends Thread {
 	private Queue<DataPacket> sendQueue;
 	final static int MAX_LATENCY_MS = 500;
 	
+    final static int nameserverPort = 3825;
+    final static String nameserverIP = "192.17.255.225";
+	
+	
 	public NetworkThread(WebcamInterface parent, int port) {
 		this.parent = parent;
 		this.port = port;
@@ -30,7 +36,9 @@ public class NetworkThread extends Thread {
 	
 	public void run() {
 		System.out.println("Server NetworkThread started...");
-		try {
+		try {		
+			//nameserverConnect("alice","add",nameserverIP,nameserverPort);
+			
 			serverSock = new ServerSocket(port);
 			clientSock = serverSock.accept();
 			
@@ -57,6 +65,59 @@ public class NetworkThread extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private String nameserverConnect(String sname, String stype, String nsIP, int nsPort) throws IOException {
+		String TrimmedIP;
+	    Socket nssock;
+	    DataInputStream nsinput;
+	    DataOutputStream nsoutput;
+
+		System.out.println("Hello World");
+	    
+		while(true){ //Try again if this was the server's first connection
+			nssock = new Socket(nsIP, nsPort);
+		
+			nsoutput = new DataOutputStream(nssock.getOutputStream());
+			nsinput = new DataInputStream(nssock.getInputStream());
+
+			System.out.println("Connected to nameserver");
+			
+			byte[] name = new byte[16];
+			byte[] tname = sname.getBytes("US-ASCII");
+			byte[] type = new byte[16];
+			byte[] ttype = stype.getBytes("US-ASCII");
+			byte[] ip = new byte[48];
+			
+			java.lang.System.arraycopy(tname, 0, name, 0, tname.length);
+			java.lang.System.arraycopy(ttype, 0, type, 0, ttype.length);
+			
+			nsoutput.write(name);
+			System.out.println("Name Written: " + name.length + " bytes");				
+			nsoutput.write(type);
+			System.out.println("Type Written: " + type.length + " bytes");			
+			nsinput.readFully(ip);
+
+			System.out.println("Communicated with nameserver");
+			
+			String ServerIP = new String(ip,0,0,48);
+			ServerIP.trim();
+			TrimmedIP = ServerIP.replace("\0", "");
+
+			nssock.close();
+			nsoutput.close();
+			nsinput.close();
+			
+			System.out.println("Nameserver connection closed");
+			System.out.println("nameserver IP " + ServerIP );
+
+			if(ServerIP.codePointAt(0) == 'x')
+				continue;
+			else
+				break;
+			}
+		
+		return TrimmedIP;
 	}
 	
 	public void queuePacket(DataPacket pkt) {
