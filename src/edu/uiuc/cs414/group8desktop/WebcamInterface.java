@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Mixer;
+
 import processing.core.PApplet;
 import codeanticode.gsvideo.GSCapture;
 
@@ -30,10 +33,12 @@ public class WebcamInterface extends PApplet {
 	long initialTimestamp;
 	long newTimestamp;
 	ControlP5 controlP5;
-	
+	Mixer mixer;
 	NetworkThread net;
 	AudioThread audio;
 	ControlThread control;
+	InputNetworkThread innet;
+	AudioPlayThread audioplay;
 	
 	int outBW = 0;
 	int inBW = 0;
@@ -50,6 +55,10 @@ public class WebcamInterface extends PApplet {
 		for (int i = 0; i < fps.length; i++) {
 			println(fps[i]);
 		}
+		
+	      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+	      mixer = AudioSystem.getMixer(mixerInfo[0]);
+		
 		net = new NetworkThread(this, 6666);
 		net.start();
 
@@ -65,6 +74,11 @@ public class WebcamInterface extends PApplet {
 		Timer bwTimer = new Timer();
         bwTimer.scheduleAtFixedRate(new BwTask(), 1000, 1000); 
 		
+		innet = new InputNetworkThread(this, 6668);
+		innet.start();
+		
+		audioplay = new AudioPlayThread(this);
+		audioplay.start();
 		
 		// Interface manager, controlP5
 		controlP5 = new ControlP5(this);
