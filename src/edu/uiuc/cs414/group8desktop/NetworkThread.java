@@ -37,7 +37,7 @@ public class NetworkThread extends Thread {
 	public void run() {
 		System.out.println("Server NetworkThread started...");
 		try {		
-			//nameserverConnect("alice","add",nameserverIP,nameserverPort);
+			nameserverConnect("alice","add",nameserverIP,nameserverPort);
 			
 			serverSock = new ServerSocket(port);
 			clientSock = serverSock.accept();
