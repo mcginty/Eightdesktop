@@ -32,6 +32,7 @@ public class WebcamInterface extends PApplet {
 	GSCapture cam;
 	long initialTimestamp;
 	long newTimestamp;
+	long deltaTimestamp;
 	ControlP5 controlP5;
 	Mixer mixer;
 	NetworkThread net;
@@ -108,8 +109,8 @@ public class WebcamInterface extends PApplet {
 	public void draw() {
 		if (cam.available()) {
 			long latencyTime = (new Date()).getTime();
-			long newTimestamp = (new Date()).getTime();
-			long deltaTimestamp = newTimestamp - initialTimestamp;
+			newTimestamp = (new Date()).getTime();
+			deltaTimestamp = newTimestamp - initialTimestamp;
 			cam.read();
 		    
 			set(0, 0, cam); // set() is faster than image() for no-modification stuff. Good as it gets.
@@ -143,7 +144,7 @@ public class WebcamInterface extends PApplet {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				newTimestamp = (new Date()).getTime();
+				//newTimestamp = (new Date()).getTime();
 			    ByteString buf = ByteString.copyFrom(bytes);
 				DataPacket proto = DataPacket.newBuilder()
 									.setTimestamp(deltaTimestamp)

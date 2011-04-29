@@ -40,7 +40,7 @@ public class AudioThread extends Thread {
 												bigEndian);
 			
 		      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-		      Mixer mixer = AudioSystem.getMixer(mixerInfo[3]);
+		      Mixer mixer = AudioSystem.getMixer(mixerInfo[2]);
 			
 			DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 			TargetDataLine line = (TargetDataLine) mixer.getLine(info);
@@ -51,7 +51,8 @@ public class AudioThread extends Thread {
 			System.out.println("bufferSize selected as: " + bufferSize);
 			byte buffer[] = new byte[bufferSize];
 			while (true) {
-				parent.initialTimestamp = (new Date()).getTime();
+				if (parent.initialTimestamp == 0)
+					parent.initialTimestamp = (new Date()).getTime();
 				line.read(buffer, 0, bufferSize);
 				if (parent.net.isConnected()) {
 					ByteString buf = ByteString.copyFrom(buffer);

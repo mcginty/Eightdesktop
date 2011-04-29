@@ -12,9 +12,6 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 
-import org.classpath.icedtea.pulseaudio.PulseAudioMixer;
-import org.classpath.icedtea.pulseaudio.PulseAudioSourceDataLine;
-
 import com.google.protobuf.ByteString;
 
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
@@ -50,7 +47,7 @@ public class AudioPlayThread extends Thread {
 
 	
 		      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-		      Mixer mixer = AudioSystem.getMixer(mixerInfo[2]);
+		      Mixer mixer = AudioSystem.getMixer(mixerInfo[1]);
 			      System.out.println("Available mixers:");
 			      for(int cnt = 0; cnt < mixerInfo.length;
 			                                          cnt++){
