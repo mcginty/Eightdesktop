@@ -25,7 +25,7 @@ public class NetworkThread extends Thread {
 	final static int MAX_LATENCY_MS = 500;
 	
     final static int nameserverPort = 3825;
-    final static String nameserverIP = "192.17.255.225";
+    final static String nameserverIP = "192.17.252.150";
 	
 	
 	public NetworkThread(WebcamInterface parent, int port) {
@@ -58,6 +58,7 @@ public class NetworkThread extends Thread {
 						//System.out.println("Sending a packet of size " + size + " and type " + pkt.getType().toString() + " to client.");
 						out.writeInt(size);
 						out.write(pkt.toByteArray());
+						parent.updateOutBandwidth(size+4);
 					}
 				}
 			}
@@ -95,7 +96,7 @@ public class NetworkThread extends Thread {
 			nsoutput.write(name);
 			System.out.println("Name Written: " + name.length + " bytes");				
 			nsoutput.write(type);
-			System.out.println("Type Written: " + type.length + " bytes");			
+			System.out.println("Type Written: " + type.length + " bytes");
 			nsinput.readFully(ip);
 
 			System.out.println("Communicated with nameserver");

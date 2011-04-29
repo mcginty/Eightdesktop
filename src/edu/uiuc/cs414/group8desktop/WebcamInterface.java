@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import processing.core.PApplet;
 import codeanticode.gsvideo.GSCapture;
@@ -14,8 +16,11 @@ import com.google.protobuf.ByteString;
 import controlP5.ControlEvent;
 import controlP5.ControlP5;
 
+import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
+import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket.ControlType;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket.PacketType;
+
 public class WebcamInterface extends PApplet {
 	/**
 	 * 
@@ -23,11 +28,15 @@ public class WebcamInterface extends PApplet {
 	private static final long serialVersionUID = 1L;
 	GSCapture cam;
 	long initialTimestamp;
+	long newTimestamp;
 	ControlP5 controlP5;
 	
 	NetworkThread net;
 	AudioThread audio;
 	ControlThread control;
+	
+	int outBW = 0;
+	int inBW = 0;
 	
 	public void setup() {
 		size(320, 240);
@@ -44,6 +53,8 @@ public class WebcamInterface extends PApplet {
 		net = new NetworkThread(this, 6666);
 		net.start();
 
+		initialTimestamp = 0;
+		newTimestamp = 0;
 		
 		audio = new AudioThread(this);
 		audio.start();
@@ -51,11 +62,30 @@ public class WebcamInterface extends PApplet {
 		control = new ControlThread(this, 6667);
 		control.start();
 		
-		initialTimestamp = 0;
+		Timer bwTimer = new Timer();
+        bwTimer.scheduleAtFixedRate(new BwTask(), 1000, 1000); 
+		
 		
 		// Interface manager, controlP5
 		controlP5 = new ControlP5(this);
 		controlP5.addButton("Start", 1, 10, 250, 100, 50);
+	}
+	
+	private class BwTask extends TimerTask {
+
+		@Override
+		public void run() {
+			if(net.isConnected()) {
+				System.out.println("Outgoing bandwidth: "+outBW+"Bytes/Sec");
+				outBW = 0;
+				System.out.println("Incoming bandwidth: "+inBW+"Bytes/Sec");
+				inBW = 0;
+			}
+		}
+	}
+	
+	public void updateOutBandwidth(int newBand) {
+		outBW += newBand;
 	}
 	
 	/**
@@ -63,6 +93,9 @@ public class WebcamInterface extends PApplet {
 	 */
 	public void draw() {
 		if (cam.available()) {
+			long latencyTime = (new Date()).getTime();
+			long newTimestamp = (new Date()).getTime();
+			long deltaTimestamp = newTimestamp - initialTimestamp;
 			cam.read();
 		    
 			set(0, 0, cam); // set() is faster than image() for no-modification stuff. Good as it gets.
@@ -96,15 +129,15 @@ public class WebcamInterface extends PApplet {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				if (initialTimestamp == 0) initialTimestamp = (new Date()).getTime();
+				newTimestamp = (new Date()).getTime();
 			    ByteString buf = ByteString.copyFrom(bytes);
 				DataPacket proto = DataPacket.newBuilder()
-									.setTimestamp((new Date()).getTime() - initialTimestamp)
-									.setServertime((new Date()).getTime() - initialTimestamp)
+									.setTimestamp(deltaTimestamp)
+									.setServertime(latencyTime)
 									.setType(PacketType.VIDEO)
 									.setData(buf).build();
-				
-				net.queuePacket(proto);
+				if (initialTimestamp != 0)
+					net.queuePacket(proto);
 		    }
 		}
 	}
