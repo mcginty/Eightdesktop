@@ -51,7 +51,7 @@ public class AudioPlayThread extends Thread {
 			      System.out.println("Available mixers:");
 			      for(int cnt = 0; cnt < mixerInfo.length;
 			                                          cnt++){
-			      	System.out.println(mixerInfo[cnt].
+			      	System.out.println(cnt + " - " + mixerInfo[cnt].
 			      	                              getName());
 			      }//end for loop
 			     
@@ -59,16 +59,16 @@ public class AudioPlayThread extends Thread {
 			      DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class, format);
 			SourceDataLine line = (SourceDataLine) mixer.getLine(dataLineInfo);
 			
-			System.out.println("AudioSystem.getLine succeeded");
+			//System.out.println("AudioSystem.getLine succeeded");
 			line.open(format);
-			System.out.println("Line.open succeeded");
+			//System.out.println("Line.open succeeded");
 			line.start();
 			
-			System.out.println("Server Audio Play Thread opened the audio line successfully");
+			//System.out.println("Server Audio Play Thread opened the audio line successfully");
 			//int bufferSize = (int)format.getSampleRate() * format.getFrameSize();
 			int bufferSize = 1024;
-			System.out.println("bufferSize selected as: " + bufferSize);
-			byte buffer[] = new byte[bufferSize];
+			//System.out.println("bufferSize selected as: " + bufferSize);
+			//byte buffer[] = new byte[bufferSize];
 			while (true) {	
 					while (q.size() > 10) q.remove();
 					if ( !q.isEmpty() ) {
@@ -76,6 +76,15 @@ public class AudioPlayThread extends Thread {
 						//Log.d("Audio", "Grabbed some AUDIO packeterrr with timestamp " + packet.getTimestamp());
 						byte[] audio = packet.getData().toByteArray();
 						line.write(audio, 0, audio.length);
+						
+						//M-to-D latency calculation
+						long tempt2 = (new Date()).getTime();
+						long tempdelta = packet.getServertime();
+						long tempt1 = packet.getTimestamp();
+						
+						parent.MDLatency = tempt2 - (tempt1+tempdelta);
+						
+						
 					}
 				}
 		} catch (LineUnavailableException e) {

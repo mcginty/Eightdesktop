@@ -43,10 +43,10 @@ public class ControlThread extends Thread {
 			
 			in = new DataInputStream(clientSock.getInputStream());
 			out = new DataOutputStream(clientSock.getOutputStream());
-			System.out.println("Entering control loop.");
+			//System.out.println("Entering control loop.");
 			while (true) {
 				int size = in.readInt();					
-				System.out.println("Received control packet of size:"+size);
+				//System.out.println("Received control packet of size:"+size);
 				byte[] bytes = new byte[size];
 				in.readFully(bytes);
 
@@ -55,7 +55,8 @@ public class ControlThread extends Thread {
 					runRemoteCtrl(pkt.getControl());
 				}
 				else if (pkt.getType() == ControlPacket.ControlType.LATENCY) {
-					System.out.println("Latency:"+pkt.getLatency()+" ms");
+					parent.DMLatency = pkt.getLatency();
+					//System.out.println("D-to-M Latency: "+pkt.getLatency()+" ms");
 				}
 				else if (pkt.getType() == ControlPacket.ControlType.PING) {
 					sendPing();
@@ -68,7 +69,7 @@ public class ControlThread extends Thread {
 	}
 	
 	public void sendPing(){
-		System.out.println("Received ping from phone...");
+		//System.out.println("Received ping from phone...");
 		try {
 			ControlPacket pkt = ControlPacket.newBuilder()
 			   .setType(ControlType.PING)
@@ -78,14 +79,14 @@ public class ControlThread extends Thread {
 			out.writeInt(size);
 			out.write(pkt.toByteArray());
 		} catch (IOException e) {
-			System.out.println("Failed to send Ping back to phone");
+			System.err.println("Failed to send Ping back to phone");
 			e.printStackTrace();
 		}
 
 	}
 	
 	public void runRemoteCtrl(ControlCode code){
-		System.out.println("Running remote control...");
+		//System.out.println("Running remote control...");
 		Runtime rt = Runtime.getRuntime();
 		//Process p;
 		String str = "";

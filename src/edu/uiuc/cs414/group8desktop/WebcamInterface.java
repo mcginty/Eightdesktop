@@ -48,6 +48,9 @@ public class WebcamInterface extends PApplet {
 	secondApplet s;
 	Queue<DataPacket> videoQueue;
 	
+	long MDLatency = 0;
+	long DMLatency = 0;
+	
 	int outBW = 0;
 	int inBW = 0;
 	
@@ -57,11 +60,11 @@ public class WebcamInterface extends PApplet {
 		cam = new GSCapture(this, 320, 240, "/dev/video0");
 		int[][] res = cam.resolutions();
 		for (int i = 0; i < res.length; i++) {
-			println(res[i][0] + "x" + res[i][1]);
+			//println(res[i][0] + "x" + res[i][1]);
 		}
 		String[] fps = cam.framerates();
 		for (int i = 0; i < fps.length; i++) {
-			println(fps[i]);
+			//println(fps[i]);
 		}
 		
 	      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
@@ -82,6 +85,7 @@ public class WebcamInterface extends PApplet {
 		
 		Timer bwTimer = new Timer();
         bwTimer.scheduleAtFixedRate(new BwTask(), 1000, 1000); 
+        bwTimer.scheduleAtFixedRate(new LatencyTask(), 15000, 10000);
 		
 		innet = new InputNetworkThread(this, 6668);
 		innet.start();
@@ -91,7 +95,7 @@ public class WebcamInterface extends PApplet {
 		
 		new PFrame();
 	}
-	
+
 	private class BwTask extends TimerTask {
 
 		@Override
@@ -103,10 +107,25 @@ public class WebcamInterface extends PApplet {
 				inBW = 0;
 			}
 		}
+	}	
+	
+	private class LatencyTask extends TimerTask {
+
+		@Override
+		public void run() {
+			if(innet.isConnected()) {
+				System.out.println("M-to-D Latency: "+MDLatency+" ms");
+				System.out.println("D-to-M Latency: "+DMLatency+" ms");
+			}
+		}
 	}
 	
 	public void updateOutBandwidth(int newBand) {
 		outBW += newBand;
+	}
+	
+	public void updateInBandwidth(int newBand) {
+		inBW += newBand;
 	}
 	
 	/**

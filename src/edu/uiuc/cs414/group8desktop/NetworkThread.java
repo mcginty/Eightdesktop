@@ -76,7 +76,7 @@ public class NetworkThread extends Thread {
 	    DataInputStream nsinput;
 	    DataOutputStream nsoutput;
 
-		System.out.println("Hello World");
+		//System.out.println("Hello World");
 	    
 		while(true){ //Try again if this was the server's first connection
 			nssock = new Socket(nsIP, nsPort);
@@ -96,12 +96,12 @@ public class NetworkThread extends Thread {
 			java.lang.System.arraycopy(ttype, 0, type, 0, ttype.length);
 			
 			nsoutput.write(name);
-			System.out.println("Name Written: " + name.length + " bytes");				
+			//System.out.println("Name Written: " + name.length + " bytes");				
 			nsoutput.write(type);
-			System.out.println("Type Written: " + type.length + " bytes");
+			//System.out.println("Type Written: " + type.length + " bytes");
 			nsinput.readFully(ip);
 
-			System.out.println("Communicated with nameserver");
+			//System.out.println("Communicated with nameserver");
 			
 			String ServerIP = new String(ip,0,0,48);
 			ServerIP.trim();
@@ -112,7 +112,9 @@ public class NetworkThread extends Thread {
 			nsinput.close();
 			
 			System.out.println("Nameserver connection closed");
-			System.out.println("nameserver IP " + ServerIP );
+			
+			if(ServerIP.codePointAt(0) != 'z' && ServerIP.codePointAt(0) != 'x')
+				System.out.println("Returned IP " + ServerIP );
 
 			if(ServerIP.codePointAt(0) == 'x')
 				continue;
