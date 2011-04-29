@@ -19,6 +19,7 @@ message ControlPacket {
   enum ControlType {
   	REMOTE = 0;
   	LATENCY = 1;
+  	PING = 2;
   }
   
   enum ControlCode {
@@ -30,4 +31,5 @@ message ControlPacket {
   required ControlType type = 1;
   optional ControlCode control = 2;
   optional int64 latency = 3;
+  optional int64 servertime = 4;
 }

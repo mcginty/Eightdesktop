@@ -1,6 +1,7 @@
 package edu.uiuc.cs414.group8desktop;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -20,7 +21,7 @@ public class ControlThread extends Thread {
 	private final int port;
 	private ServerSocket serverSock;
 	private Socket clientSock;
-	private ObjectOutputStream out = null;
+	private DataOutputStream out = null;
 	private DataInputStream in = null;
 	private boolean isConnected = false;
 	final static int MAX_LATENCY_MS = 500;
@@ -40,7 +41,7 @@ public class ControlThread extends Thread {
 			isConnected = true;
 			
 			in = new DataInputStream(clientSock.getInputStream());
-			//out = new ObjectOutputStream(clientSock.getOutputStream());
+			out = new DataOutputStream(clientSock.getOutputStream());
 			System.out.println("Entering control loop.");
 			while (true) {
 				System.out.println("Before read:");
@@ -55,11 +56,18 @@ public class ControlThread extends Thread {
 				else if (pkt.getType() == ControlPacket.ControlType.LATENCY) {
 					
 				}
+				else if (pkt.getType() == ControlPacket.ControlType.PING) {
+					sendPing();
+				}
 			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void sendPing(){
+		
 	}
 	
 	public void runRemoteCtrl(ControlCode code){
