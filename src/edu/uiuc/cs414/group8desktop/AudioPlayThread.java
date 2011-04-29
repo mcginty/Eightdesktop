@@ -50,7 +50,7 @@ public class AudioPlayThread extends Thread {
 
 	
 		      Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
-		      Mixer mixer = AudioSystem.getMixer(mixerInfo[2]);
+		      Mixer mixer = AudioSystem.getMixer(mixerInfo[1]);
 			      System.out.println("Available mixers:");
 			      for(int cnt = 0; cnt < mixerInfo.length;
 			                                          cnt++){
