@@ -1,15 +1,19 @@
 package edu.uiuc.cs414.group8desktop;
 
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-
+import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
+import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket.ControlCode;
 
 public class ControlThread extends Thread {
 	WebcamInterface parent;
@@ -17,40 +21,39 @@ public class ControlThread extends Thread {
 	private ServerSocket serverSock;
 	private Socket clientSock;
 	private ObjectOutputStream out = null;
-	private ObjectInputStream in = null;
+	private DataInputStream in = null;
 	private boolean isConnected = false;
-	private Queue<DataPacket> sendQueue;
 	final static int MAX_LATENCY_MS = 500;
 	
 	public ControlThread(WebcamInterface parent, int port) {
 		this.parent = parent;
 		this.port = port;
-		sendQueue = new LinkedBlockingQueue<DataPacket>(10);
 	}
 	
 	public void run() {
-		System.out.println("Server NetworkThread started...");
+		System.out.println("Server ControlThread started...");
 		try {
 			serverSock = new ServerSocket(port);
 			clientSock = serverSock.accept();
 			
-			System.out.println("Successfully connected to client " + clientSock.getInetAddress().toString());
+			System.out.println("Control Successfully connected to client " + clientSock.getInetAddress().toString());
 			isConnected = true;
 			
-			in = new ObjectInputStream(clientSock.getInputStream());
-			out = new ObjectOutputStream(clientSock.getOutputStream());
-			System.out.println("Entering loop.");
+			in = new DataInputStream(clientSock.getInputStream());
+			//out = new ObjectOutputStream(clientSock.getOutputStream());
+			System.out.println("Entering control loop.");
 			while (true) {
-				//System.out.println("Attempting write of bytes.");
-				if (!sendQueue.isEmpty()) {
-					DataPacket pkt = sendQueue.poll();
-					System.out.println("Latency: "+ (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp()));
-					if (((new Date()).getTime() - parent.initialTimestamp) - pkt.getTimestamp() < MAX_LATENCY_MS) {
-						int size = pkt.getSerializedSize();
-						System.out.println("Sending a packet of size " + size + " and type " + pkt.getType().toString() + " to client.");
-						out.writeInt(size);
-						out.write(pkt.toByteArray());
-					}
+				System.out.println("Before read:");
+				int size = in.readInt();					
+				System.out.println("Received control packet of size:"+size);
+				byte[] bytes = new byte[size];
+				in.readFully(bytes);
+				ControlPacket pkt = ControlPacket.parseFrom(bytes);
+				if (pkt.getType() == ControlPacket.ControlType.REMOTE) {
+					runRemoteCtrl(pkt.getControl());
+				}
+				else if (pkt.getType() == ControlPacket.ControlType.LATENCY) {
+					
 				}
 			}
 			
@@ -59,12 +62,31 @@ public class ControlThread extends Thread {
 		}
 	}
 	
-	public void queuePacket(DataPacket pkt) {
-		if (sendQueue.size() == 10) {
-			for (int i=0; i<10; i++) sendQueue.remove();
+	public void runRemoteCtrl(ControlCode code){
+		System.out.println("Running remote control...");
+		Runtime rt = Runtime.getRuntime();
+		//Process p;
+		String str = "";
+		switch(code) {
+		case UP:
+			str = "u";
+			break;
+		case DOWN:
+			str = "d";
+			break;
+		case LEFT:
+			str = "l";
+			break;
+		case RIGHT:
+			str = "r";
+			break;
 		}
-		System.out.println("pkt with timestamp " + pkt.getTimestamp() + " queued. qsize: " + sendQueue.size());
-		sendQueue.add(pkt);
+		try {
+			rt.exec(System.getProperty("user.dir")+"/pantilt "+str);
+		} catch (IOException e) {
+			System.err.println("Unable to execute remote control command");
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean isConnected() {

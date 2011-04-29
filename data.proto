@@ -10,11 +10,16 @@ message DataPacket {
   enum PacketType {
     VIDEO = 0;
     AUDIO = 1;
-    CONTROL = 2;
-    PING = 3;
   }
   required PacketType type = 3;
   optional bytes data = 4;
+}
+
+message ControlPacket {
+  enum ControlType {
+  	REMOTE = 0;
+  	LATENCY = 1;
+  }
   
   enum ControlCode {
   	UP = 0;
@@ -22,19 +27,7 @@ message DataPacket {
   	LEFT = 2;
   	RIGHT = 3;
   }
-  optional ControlCode control = 5;
-  optional int32 pingid = 6;
-}
-
-message ControlPacket {
-  enum ControlType {
-  	DEFAULT = 0;
-  }
-    enum ControlCode {
-  	UP = 0;
-  	DOWN = 1;
-  	LEFT = 2;
-  	RIGHT = 3;
-  }
-  required ControlCode control = 1;
+  required ControlType type = 1;
+  optional ControlCode control = 2;
+  optional int64 latency = 3;
 }
