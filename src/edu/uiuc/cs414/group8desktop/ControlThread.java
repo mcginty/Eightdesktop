@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.DataPacket;
 import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket.ControlCode;
+import edu.uiuc.cs414.group8desktop.DataProto.ControlPacket.ControlType;
 
 public class ControlThread extends Thread {
 	WebcamInterface parent;
@@ -44,17 +45,17 @@ public class ControlThread extends Thread {
 			out = new DataOutputStream(clientSock.getOutputStream());
 			System.out.println("Entering control loop.");
 			while (true) {
-				System.out.println("Before read:");
 				int size = in.readInt();					
 				System.out.println("Received control packet of size:"+size);
 				byte[] bytes = new byte[size];
 				in.readFully(bytes);
+
 				ControlPacket pkt = ControlPacket.parseFrom(bytes);
 				if (pkt.getType() == ControlPacket.ControlType.REMOTE) {
 					runRemoteCtrl(pkt.getControl());
 				}
 				else if (pkt.getType() == ControlPacket.ControlType.LATENCY) {
-					
+					System.out.println("Latency:"+pkt.getLatency()+" ms");
 				}
 				else if (pkt.getType() == ControlPacket.ControlType.PING) {
 					sendPing();
@@ -67,7 +68,20 @@ public class ControlThread extends Thread {
 	}
 	
 	public void sendPing(){
-		
+		System.out.println("Received ping from phone...");
+		try {
+			ControlPacket pkt = ControlPacket.newBuilder()
+			   .setType(ControlType.PING)
+			   .setServertime((new Date()).getTime())
+			   .build();
+			int size = pkt.getSerializedSize();
+			out.writeInt(size);
+			out.write(pkt.toByteArray());
+		} catch (IOException e) {
+			System.out.println("Failed to send Ping back to phone");
+			e.printStackTrace();
+		}
+
 	}
 	
 	public void runRemoteCtrl(ControlCode code){
